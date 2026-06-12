@@ -1,0 +1,119 @@
+#include <iostream>
+//#include <time.h>
+//#include <cstring>
+#include <iomanip>
+//#include <stdlib.h>
+//#include <conio.h>
+
+struct carti{
+
+	int val;
+	int cul;
+	bool desc;
+
+}carti[60], neut;
+
+struct carti* masa[40][40], c;
+
+int x, y, ndeck, last[8], nshown;
+
+
+void generare()
+{
+	//memset(*masa, 0,sizeof(*masa));
+	int frecventa[60],a=0;
+	memset(frecventa, 0, sizeof(frecventa));
+
+	int ran;
+	srand(time(0));
+
+	neut.val = 0;
+	neut.cul = 0;
+	neut.desc = false;
+
+	for (int i = 0; i <= 30; i++)
+		for (int j = 0; j <= 30; j++)
+			masa[i][j] = &neut;
+
+	for (int i = 1; i <= 7; i++)
+		last[i] = i;
+
+	for (int i = 1; i <= 52; i++) //punem valorile si culorile la carti
+	{
+		carti[i].val = i % 13 + 1;
+		carti[i].cul = i % 4 + 1;
+	}
+	
+	for(x=1;x<=7;x++)
+		for (y = x; y <= 7; y++)
+		{
+			ran = rand() % 52 + 1;
+			while(frecventa[ran])
+			{
+				ran = rand() % 52 + 1;
+			}
+			a++;
+			masa[x][y] = &carti[ran];
+			frecventa[ran] = 1;
+		}
+
+	ndeck = 52 - a;
+	y = 0;
+
+	for (x = 1; x <=ndeck ; x++)
+	{
+
+		ran = rand() % 52 + 1;
+		while (frecventa[ran])
+		{
+			ran = rand() % 52 + 1;
+		}
+		masa[x][y] = &carti[ran]; //std::cout << std::endl << (*masa[x][y]).val;
+		frecventa[ran] = 1;
+	}
+	nshown = ndeck; // de schimbat la ndeck + 1
+}
+
+
+void afisare()
+{
+	if (nshown != 0)
+		std::cout << std::setw(3) << "X";
+	else std::cout << std::setw(3) << " ";
+
+	if ((*masa[nshown][0]).val)
+	{
+		std::cout << std::setw(3) << (*masa[nshown][0]).val;
+	}
+	else std::cout << std::setw(3) << " ";
+
+	std::cout << std::endl << std::endl;
+
+	int boardsize = 20;
+	for (x = 1; x <= boardsize; x++)
+	{
+		for (y = 1; y <= 7; y++)
+		{
+			if ((*masa[x][y]).val>0)
+			{
+				std::cout << std::setw(3) << (*masa[x][y]).val;
+			}
+			else std::cout << std::setw(3) << " ";
+		}
+		std::cout << std::endl;
+	}
+
+
+}
+
+int main()
+{
+	generare();
+	afisare();
+}
+
+/*
+	A 2 3 4 5 6 7 8 9 10 12 13 14
+
+
+*/
