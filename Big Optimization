@@ -2,6 +2,7 @@
 //#include <time.h>
 //#include <cstring>
 #include <iomanip>
+#include <Windows.h>
 //#include <stdlib.h>
 //#include <conio.h>
 
@@ -13,6 +14,7 @@ struct carti{
 
 }carti[60], neut;
 
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 struct carti* masa[40][40], c;
 
 int x, y, ndeck, last[8], nshown;
@@ -30,6 +32,8 @@ void generare()
 	neut.val = 0;
 	neut.cul = 0;
 	neut.desc = false;
+
+	//pt elementul gol
 
 	for (int i = 0; i <= 30; i++)
 		for (int j = 0; j <= 30; j++)
@@ -50,11 +54,17 @@ void generare()
 			ran = rand() % 52 + 1;
 			while(frecventa[ran])
 			{
-				ran = rand() % 52 + 1;
+				ran = rand() % 52 + 1; // le generez ce carti atribui
 			}
 			a++;
 			masa[x][y] = &carti[ran];
 			frecventa[ran] = 1;
+
+			if (x == y)
+			{
+				(*masa[x][y]).desc = true; //le descopar pe ultimele din linie
+			}
+				
 		}
 
 	ndeck = 52 - a;
@@ -70,40 +80,106 @@ void generare()
 		}
 		masa[x][y] = &carti[ran]; //std::cout << std::endl << (*masa[x][y]).val;
 		frecventa[ran] = 1;
+		(*masa[x][y]).desc = true;
 	}
 	nshown = ndeck; // de schimbat la ndeck + 1
 }
 
+void culoare(int cul)
+{
+	if (cul == 1)
+	{
+		SetConsoleTextAttribute(hConsole, 4);//rosu
+	}
+	if (cul == 2)
+	{
+		SetConsoleTextAttribute(hConsole, 8);//negru
+	}
+	if (cul == 3)
+	{
+		SetConsoleTextAttribute(hConsole, 5);//carou
+	}
+	if (cul == 4)
+	{
+		SetConsoleTextAttribute(hConsole, 7);//trifoi
+	}
+
+
+}
+
+void afisCor(int x)
+{
+	if (x == 11)
+		std::cout << std::setw(3) << "J";
+	else if (x == 12)
+		std::cout << std::setw(3) << "Q";
+	else if (x == 13)
+		std::cout << std::setw(3) << "K";
+	else if (x == 1)
+		std::cout << std::setw(3) << "A";
+	else 
+		std::cout << std::setw(3) << x;
+}
+
+void afisPuse()
+{
+	SetConsoleTextAttribute(hConsole, 4);
+	std::cout << std::setw(3) <<  "#";
+	SetConsoleTextAttribute(hConsole, 8);
+	std::cout << std::setw(3) << "#";
+	SetConsoleTextAttribute(hConsole, 5);
+	std::cout << std::setw(3) << "#";
+	SetConsoleTextAttribute(hConsole, 7);
+	std::cout << std::setw(3) << "#";
+
+}
 
 void afisare()
 {
+	SetConsoleTextAttribute(hConsole, 1);//albastru
 	if (nshown != 0)
 		std::cout << std::setw(3) << "X";
 	else std::cout << std::setw(3) << " ";
 
 	if ((*masa[nshown][0]).val)
 	{
-		std::cout << std::setw(3) << (*masa[nshown][0]).val;
+		culoare((*masa[nshown][0]).cul);
+		afisCor((*masa[nshown][0]).val);
 	}
-	else std::cout << std::setw(3) << " ";
+	else
+	{
+		std::cout << std::setw(3) << " ";
+	}
+
+	afisPuse();
 
 	std::cout << std::endl << std::endl;
+
+
+
 
 	int boardsize = 20;
 	for (x = 1; x <= boardsize; x++)
 	{
 		for (y = 1; y <= 7; y++)
 		{
-			if ((*masa[x][y]).val>0)
+			if (!(*masa[x][y]).desc && (*masa[x][y]).val > 0)
 			{
-				std::cout << std::setw(3) << (*masa[x][y]).val;
+				SetConsoleTextAttribute(hConsole, 1);
+				std::cout << std::setw(3) << "X";
 			}
-			else std::cout << std::setw(3) << " ";
+			else if ((*masa[x][y]).val>0 )
+			{
+				culoare((*masa[x][y]).cul);
+				afisCor((*masa[x][y]).val);
+			}
+			else
+			{
+				std::cout << std::setw(3) << " ";
+			}
 		}
 		std::cout << std::endl;
 	}
-
-
 }
 
 int main()
@@ -115,5 +191,6 @@ int main()
 /*
 	A 2 3 4 5 6 7 8 9 10 12 13 14
 
+	Urmeaza sa fac select menu-ul
 
 */
