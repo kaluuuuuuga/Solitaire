@@ -1,0 +1,616 @@
+#include <iostream>
+//#include <time.h>
+//#include <cstring>
+#include <iomanip>
+#include <Windows.h>
+//#include <stdlib.h>
+#include <conio.h>
+
+struct carti{
+
+	int val;
+	int cul;
+	bool desc;
+}carti[60], neut;
+
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+
+struct carti *masa[40][40], *c;
+
+int x, y, ndeck, last[12], nshown;
+
+bool win = false, lose = false, mut=false;
+int xc = 1, yc = 1, xm = -1, ym= -1;
+
+void generare()
+{
+	//memset(*masa, 0,sizeof(*masa));
+	int frecventa[60],a=0;
+	memset(frecventa, 0, sizeof(frecventa));
+
+	int ran;
+	srand(time(0));
+
+		neut.val = 0;
+		neut.cul = 0;
+		neut.desc = false;
+	
+
+	//pt elementul gol
+
+	for (int i = 0; i <= 25; i++)  /// De ce nu trebuie sa fie mai mare decat 25???
+		for (int j = 0; j <= 11; j++)
+			masa[i][j] = &neut;
+
+	for (int i = 1; i <= 7; i++)
+		last[i] = i;
+
+	for (int i = 1; i <= 52; i++) //punem valorile si culorile la carti
+	{
+		carti[i].val = i % 13 + 1;
+		carti[i].cul = i % 4 + 1;
+	}
+	
+	for(x=1;x<=7;x++)
+		for (y = x; y <= 7; y++)
+		{
+			ran = rand() % 52 + 1;
+			while(frecventa[ran])
+			{
+				ran = rand() % 52 + 1; // le generez ce carti atribui
+			}
+			a++;
+			masa[x][y] = &carti[ran];
+			frecventa[ran] = 1;
+
+			if (x == y)
+			{
+				(*masa[x][y]).desc = true; //le descopar pe ultimele din linie
+			}
+				
+		}
+
+	for (int i = 8; i <= 11; i++)
+	{
+		last[i] = 0;
+	}
+	
+	
+		
+
+	ndeck = 52 - a;
+	y = 0;
+
+
+	for (x = 1; x <=ndeck ; x++)
+	{
+
+		ran = rand() % 52 + 1;
+		while (frecventa[ran])
+		{
+			ran = rand() % 52 + 1;
+		}
+		masa[x][y] = &carti[ran]; //std::cout << std::endl << (*masa[x][y]).val;
+		frecventa[ran] = 1;
+		(*masa[x][y]).desc = true;
+	}
+	masa[0][0] = &neut;
+
+	nshown = ndeck+1;
+
+	win = false;
+	lose = false;
+
+	xc = 1; yc = 1;
+}
+
+void culoare(int colour, int x, int y) // x si y reprezinta pozitia la care se determina culoarea
+{
+
+	
+	SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN);
+	if ((xc==x && yc == y) || (last[yc]==0 && yc==y && xc==0)) //daca este cursorul acolo sau daca este spatiu gol
+	{
+		if (colour == 1)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | FOREGROUND_RED);//rosu
+		}
+		else if (colour == 2)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | 0);//negru
+		}
+		else if (colour == 3)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | FOREGROUND_RED | FOREGROUND_BLUE);//carou
+		}
+		else if (colour == 4)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);//trifoi
+		}
+		else
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | 0);
+		}
+
+	}
+	else //daca nu e selectat
+	{	
+		if (colour == 1)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_RED);//rosu
+		}
+		else if (colour == 2)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | 0);//negru
+		}
+		else if (colour == 3)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE);//carou
+		}
+		else if (colour == 4)
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);//trifoi
+		}
+		else
+		{
+			SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | 0);
+		}
+	}
+	if (xm == x && ym == y)
+	{
+		SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | BACKGROUND_RED | BACKGROUND_BLUE);
+	}
+}
+
+void afisCor(int x)
+{
+	if (x == 11)
+		std::cout << std::setw(3) << "J";
+	else if (x == 12)
+		std::cout << std::setw(3) << "Q";
+	else if (x == 13)
+		std::cout << std::setw(3) << "K";
+	else if (x == 1)
+		std::cout << std::setw(3) << "A";
+	else 
+		std::cout << std::setw(3) << x;
+}
+
+void afisPuse()
+{
+	int xr = last[8], xn = last[9], xk = last[10], xt = last[11];
+
+	culoare( 1, xr, 8);//rosu
+	if (xr == 0)
+		std::cout << std::setw(3) << "#"; 
+	else afisCor((*masa[xr][8]).val);
+
+	culoare(2, xn, 9); //negru
+	if (xn == 0)
+	std::cout << std::setw(3) << "#";
+	else afisCor((*masa[xn][9]).val);
+
+	culoare(3, xk, 10);//carou
+	if (xk == 0)
+	std::cout << std::setw(3) << "#";
+	else afisCor((*masa[xk][10]).val);
+
+	culoare(4, xt, 11);//trifoi
+	if (xt == 0)
+	std::cout << std::setw(3) << "#";
+	else afisCor((*masa[xt][11]).val);
+}
+
+void afisare()
+{
+	SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_BLUE);//albastru
+	if (nshown != 1 && ndeck>0)
+		std::cout << std::setw(3) << "X";
+	else std::cout << std::setw(3) << " ";
+
+	std::cout << std::setw(3) << " ";
+
+	if ((*masa[nshown][0]).val)
+	{
+		culoare((*masa[nshown][0]).cul, nshown, 0);
+		afisCor((*masa[nshown][0]).val);
+	}
+	else
+	{
+		std::cout << std::setw(3) << " ";
+	}
+
+	afisPuse();
+	std::cout << std::endl << std::endl;
+
+
+
+
+	int boardsize = 15,boardwidth = 7;
+	for (x = 1; x <= boardsize; x++)
+	{
+		for (y = 1; y <= boardwidth; y++)
+		{
+			if (!(*masa[x][y]).desc && (*masa[x][y]).val > 0)
+			{
+				SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_BLUE);
+				std::cout << std::setw(3) << "X";
+			}
+			else if ((*masa[x][y]).val>0 )
+			{
+				culoare((*masa[x][y]).cul, x, y);
+				afisCor((*masa[x][y]).val);
+			}
+			else if (last[y]==0 && x==1 && yc==y)
+			{
+				culoare((*masa[1][y]).cul, 1, y);
+				std::cout << std::setw(3) << " ";
+			}
+			else
+			{
+				SetConsoleTextAttribute(hConsole, BACKGROUND_GREEN | FOREGROUND_BLUE);
+				std::cout << std::setw(3) << " ";
+			}
+		}
+		std::cout << std::endl;
+	}
+}
+int condP()
+{	//nush daca e bine xm==last[ym]
+	if ( ((*masa[xm][ym]).val == (*masa[xc][yc]).val + 1 ) && ((*masa[xm][ym]).cul == yc-7) && yc>=8 && (xm==last[ym]|| ym==0) )
+	{
+		return 1;
+	}
+
+	return 0;
+}
+
+int cond()
+{
+	//daca culoarea si valoarea corespund
+	if ( (((*masa[xm][ym]).cul % 2 != (*masa[xc][yc]).cul % 2) && ((*masa[xm][ym]).val + 1 == (*masa[xc][yc]).val)) || ((*masa[xm][ym]).val == 13 && (*masa[xc][yc]).cul == 0) && yc<8)
+	{
+			return 1;		
+	}
+		
+
+	return 0;
+}
+
+void cursor(int offsetx, int offsety)
+{
+	if ((*masa[offsetx + xc][offsety + yc]).desc)
+	{
+		xc += offsetx;
+		yc += offsety;
+	}
+	else //mutare din coloana pe coloana
+	{ 
+		xc = last[yc + offsety];
+		yc = yc + offsety;
+	}
+
+}
+
+void draw()
+{
+	if (nshown > 1)
+	{
+		nshown--;
+		if (xc==nshown+1 && yc==0)
+		{
+			xc = nshown;
+			cursor(0, 0);
+		}
+		if (xm == nshown + 1 && ym == 0) //anuleaza mutarea daca dai draw
+		{
+			xm = -1;
+			ym = -1;
+			mut = false;
+		}
+	}
+	else if (nshown == 1)
+	{
+		if (yc == 0)
+		{
+			yc = 8;
+			xc = last[yc];
+			cursor(0, 0);
+		}
+		nshown = ndeck + 1;
+	
+	}
+
+	
+}
+void mutare()
+{
+	if (yc != 0)
+		if (xm < last[ym] && yc<=7)
+		{
+			if (xm > 0)
+				if ((*masa[xm - 1][ym]).val > 0)
+					(*masa[xm - 1][ym]).desc = true;
+
+			int p = last[ym]; int z = xc;
+			for (int i = xm; i <= p; i++)
+			{
+				last[ym]--;
+				last[yc]++;
+
+				c = masa[i][ym];
+				masa[i][ym] = masa[z + 1][yc];
+				masa[z + 1][yc] = c;
+				z++;
+			}
+			mut = false;
+		}
+		else
+		{
+			last[ym]--;
+			last[yc]++;
+			if ((*masa[xm - 1][ym]).val > 0)
+				(*masa[xm - 1][ym]).desc = true;
+
+			c = masa[xm][ym]; // c primeste pointer-ul memorat in vectorul masa
+			masa[xm][ym] = masa[xc + 1][yc];
+			masa[xc + 1][yc] = c;
+			mut = false;
+			
+			if (yc > 7 && yc <= 11)
+			{
+				xc = last[yc];
+			}
+		}
+
+	if (ym == 0)
+	{
+		for (int x = nshown; x <= ndeck; x++)
+		{
+			masa[x][0] = masa[x + 1][0];
+		}
+		masa[ndeck + 1][0] = &neut;
+		ndeck--;
+	}
+	xm = -1; ym = -1;
+
+	if ((*masa[last[8]][8]).val == (*masa[last[9]][9]).val==(*masa[last[10]][10]).val == (*masa[last[11]][11]).val==13)
+	{
+		win = true;
+	}
+}
+
+void ifMoving()
+{
+	//daca cursorul se afla pe aceeasi pozitie cu mutarea se anuleaza mutarea
+	// altfel daca nu este initiata deja mutarea si valoarea mutata este mai mare ca 0 se initiaza
+	//altfel se verifica conditiile de mutare
+	if (xm==xc && ym==yc)
+	{
+		mut = false;
+		xm = -1;
+		ym = -1;
+	}
+	else
+	{
+		if (!mut && !(xc == 0 && yc >= 8))
+		{
+			if ((*masa[xc][yc]).val > 0)
+			{
+				mut = true;
+				xm = xc;
+				ym = yc;
+			}
+			
+		}
+		else if(mut)
+		{
+			if (condP() || cond())
+				mutare();
+		}
+		
+		
+	}
+			
+
+}
+void laDreapta()
+{
+	if (yc == 0)
+	{
+		yc = 8;	
+		xc = last[yc];
+	}
+	else if(yc<11)
+	{
+		yc++;
+		xc = last[yc];
+	}
+	
+}
+
+void action(int c)
+{
+	if (c == 100)
+	{
+		draw();
+	}
+	else if (c == 109)
+	{
+		ifMoving();
+	}
+	else if (c == 72)
+	{
+		if (xc > 0 && yc <= 3 && nshown != ndeck+1 && ndeck > 0) // mutare pe deck
+		{
+			if (!(*masa[xc - 1][yc]).desc)
+			{
+				yc = 0; xc = nshown;
+			}
+
+		}
+		else if (xc == 0 && nshown != ndeck + 1 && yc<=3) // pt atunci cand e spatiu gol
+		{
+			yc = 0; xc = nshown;
+		}
+		else if (xc > 0 && yc > 3 && yc<=7)
+		{
+			if (!(*masa[xc - 1][yc]).desc)
+			{
+				yc += 4; xc = last[yc];
+			}
+		}
+		else if (xc == 0 && yc > 3 && yc<=7)
+		{
+			yc += 4; xc = last[yc];
+		}
+
+		if (xc >= 2 && yc != 0 && yc<=7)
+			cursor(-1, 0);
+		
+	}
+	else if (c == 80)
+	{
+		if (xc < 16 && yc!=0)
+		cursor(1,0);
+
+		if (yc == 0)
+		{
+			if ((*masa[1][3]).desc)
+			{
+				xc = 1;
+				yc = 3;
+			}
+			else
+			{
+				yc = 3;
+				xc = last[yc];
+			}			
+		}
+		if (yc >= 8)
+		{
+			yc -= 4;
+			xc = last[yc];
+			
+		}
+	}
+	else if (c == 75)
+	{
+		
+
+		if (yc > 1 && yc < 8)
+		{
+			if ((*masa[xc + 1][yc - 1]).desc == true && xc == 0)
+				cursor(1, -1);
+			else 
+			cursor(0, -1);
+		}
+		else if (yc == 8 && nshown!=ndeck+1)
+		{
+			yc = 0;
+			xc = nshown;
+		}
+		else if (yc > 8)
+		{
+			yc--;
+			xc = last[yc];
+		}
+	}
+	else if (c == 77)
+	{
+		if (yc < 7 && yc != 0)
+			cursor(0, 1);
+		else if (yc == 0)
+		{
+			yc = 8;
+			xc = last[yc];
+		}
+		else if (yc < 11)
+		{
+			yc++;
+			xc = last[yc];
+		}
+	}
+
+}
+
+// d - 100
+// m - 109
+// up - 72
+// down - 80
+// left - 75
+// right - 77
+// /b - backspace /r - Enter
+bool condCastig()
+{
+	
+
+	if ((*masa[8][last[8]]).val == 13 && (*masa[9][last[9]]).val == 13 && (*masa[10][last[10]]).val == 13 && (*masa[11][last[11]]).val == 13)
+	{
+		return true;
+	}
+	// sau daca nu mai sunt carti in deck si carti de intors
+	return false;
+}
+
+void game()
+{
+		while (!win && !lose)
+		{
+			system("cls"); // "clear" for unix-like systems
+			afisare();
+			std::cout << xc << " " << yc << std::endl << last[yc];
+			int c = _getch();
+			action(c);
+			//std::cout << c;
+			if (condCastig())
+			{
+				win = true;
+				char a;
+				system("cls");
+				std::cout << "YOU WIN!!!! press Enter to continue";
+				a = _getch();
+				while (a != '\r')
+					a = _getch();
+				system("cls");
+			}
+		}
+		
+	}
+
+void menu()
+{
+	char a;
+	std::cout << "Alege Jocul folosind tasta Enter:" << std::endl;
+	std::cout << "1. Klondike";
+	a = _getch();
+	while(a!= '\r')
+		a = _getch();
+
+	generare();
+	game();
+	
+}
+
+int main()
+{
+		while (1)
+		{
+			menu();
+		}
+			
+}
+
+/*
+	draw-ul e pe poz y=0 
+	puse-le sunt pe y={8,9,10,11}
+	A 2 3 4 5 6 7 8 9 10 12 13 14
+*/
+
+/*
+	de rearanjat codul sa fie mai frumusel
+	
+	te facut meniul separat
+	si de adaugat restart-ul
+*/
