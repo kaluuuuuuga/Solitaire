@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ConsoleSolitaire/ConsoleSolitaire.vcxproj" Id="8739c7a0-f706-4789-80e7-5e907dc5764c" />
+</Solution>
