@@ -7,11 +7,15 @@ Play the latest Windows version of Terminal Solitaire here.
 Controls:
 
 m - to select a card , then m again to move it
+
 d - draw a card from the pile
 
 Card Colors:
 
 Black - Spades
+
 Grey - Clubs
+
 Red - Hearts
+
 Purple - Diamonds
